@@ -12,18 +12,24 @@ public abstract class Unit {
     private final String name;
     private int health;
     private int attack;
+    private int attackBonus;
     private int armor;
+    private int resistBonus;
     private int initiative;
+    private int initiativeBonus;
     private Army army;
     private Field field;
     private Location location;
 
-    public Unit (String name, int health, int attack, int armor, Field field, Location location) {
+    protected Unit (String name, int health, int attack, int armor, Field field, Location location) {
         this.name = name;
         this.health = health;
         this.attack = attack;
+        this.attackBonus = 0;
         this.armor = armor;
+        this.resistBonus = 0;
         this.initiative = 0;
+        this.initiativeBonus = 0;
         this.field = field;
         this.location = location;
     }
@@ -52,9 +58,37 @@ public abstract class Unit {
         }
     }
 
-    abstract int getAttackBonus();
+    public void setAttack(int attack) {
+        this.attack = attack;
+    }
 
-    abstract int getResistBonus();
+    public void setArmor(int armor) {
+        this.armor = armor;
+    }
+
+    public void setInitiativeBonus(int initiativeBonus) {
+        this.initiativeBonus = initiativeBonus;
+    }
+
+    public int getAttackBonus() {
+        return attackBonus;
+    }
+
+    public void setAttackBonus(int attackBonus) {
+        this.attackBonus = attackBonus;
+    }
+
+    public int getResistBonus() {
+        return resistBonus;
+    }
+
+    public void setResistBonus(int resistBonus) {
+        this.resistBonus = resistBonus;
+    }
+
+    public int getInitiativeBonus() {
+        return this.initiativeBonus;
+    }
 
     public int attack(Unit opponent) {
         int postAttackHealth = Math.min(
@@ -136,7 +170,7 @@ public abstract class Unit {
         }
     }
 
-    protected Field getField() {
+    public Field getField() {
         return this.field;
     }
 

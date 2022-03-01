@@ -1,5 +1,6 @@
 package norseninja.wargame;
 
+import norseninja.wargame.tempeffect.TempEffect;
 import norseninja.wargame.unit.Unit;
 
 import java.time.LocalTime;

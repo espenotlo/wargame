@@ -1,8 +1,10 @@
 package norseninja.wargame;
 
+import norseninja.wargame.tempeffect.TempEffect;
 import norseninja.wargame.unit.Unit;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Field {
 
@@ -12,6 +14,7 @@ public class Field {
     private final int depth;
     private final int width;
     private final Object[][] field;
+    private final List<TempEffect> tempEffects;
 
     /**
      * Represent a field of the given dimensions.
@@ -22,6 +25,7 @@ public class Field {
         this.depth = depth;
         this.width = width;
         this.field = new Object[depth][width];
+        this.tempEffects = new ArrayList<>();
     }
 
     /**
@@ -211,6 +215,17 @@ public class Field {
         return occupied;
     }
 
+    public List<Unit> getUnitsWithinRange(Location location, int range) {
+        List<Unit> units = new LinkedList<>();
+        List<Location> occupiedLocations = getOccupiedAdjacentLocations(location, range);
+        for (Location l : occupiedLocations) {
+            if (getObjectAt(l) instanceof Unit) {
+                units.add((Unit) getObjectAt(l));
+            }
+        }
+        return units;
+    }
+
     public List<Location> getAllLocations() {
         // The list of locations to be returned.
         List<Location> locations = new LinkedList<>();
@@ -274,7 +289,6 @@ public class Field {
      */
     public String getAsString() {
         StringBuilder sb = new StringBuilder("Field:\n");
-        int i = 0;
         for (int y = 0; y < depth; y++) {
             for (int x = 0; x < width; x++) {
                 if (field[x][y] == null) {
@@ -287,11 +301,26 @@ public class Field {
                         sb.append("O");
                     }
                     sb.append(" ");
-                    i++;
                 }
             }
             sb.append("\n");
         }
         return sb.toString();
+    }
+
+    public List<TempEffect> getTempEffects() {
+        return this.tempEffects;
+    }
+
+    public void addTempEffect(TempEffect tempEffect) {
+        this.tempEffects.add(tempEffect);
+    }
+
+    public void removeTempEffect(TempEffect tempEffect) {
+        this.tempEffects.remove(tempEffect);
+    }
+
+    public List<TempEffect> getTempEffectsBySource(Unit unit) {
+        return tempEffects.stream().filter(effect -> effect.getSource() == unit).collect(Collectors.toList());
     }
 }

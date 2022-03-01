@@ -10,20 +10,12 @@ public class RangedUnit extends Unit {
 
     public RangedUnit(String name, int health, int attack, int armor, Field field, Location location) {
         super(name, health, attack, armor, field, location);
+        super.setAttackBonus(6);
     }
 
     public RangedUnit (String name, int health, Field field, Location location) {
         super(name, health, 15, 10, field, location);
-    }
-
-    @Override
-    public int getAttackBonus() {
-        return 6;
-    }
-
-    @Override
-    public int getResistBonus() {
-        return 0;
+        super.setAttackBonus(6);
     }
 
     @Override
