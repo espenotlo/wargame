@@ -1,26 +1,22 @@
 package norseninja.wargame.unit;
 
-import norseninja.wargame.Field;
+import norseninja.wargame.Battlefield;
 import norseninja.wargame.Location;
 
 public class UnitFactory {
-    public static final int INFANTRY = 0;
-    public static final int RANGED = 1;
-    public static final int CAVALRY = 2;
-    public static final int COMMANDER = 4;
 
-    public static Unit createUnit(int unitType, Field field, Location location) {
-        Unit returnUnit = null;
+    public enum UnitType {
+        INFANTRY, RANGED, CAVALRY, PALADIN, WARCHIEF, DEATH_KNIGHT
+    }
 
-        if (unitType == 0) {
-            returnUnit = new InfantryUnit("infantry", 60, field, location);
-        } else if (unitType == 1) {
-            returnUnit = new RangedUnit("ranged", 45, field, location);
-        } else if (unitType == 2) {
-            returnUnit = new CavalryUnit("cavalry", 75, field, location);
-        } else if (unitType == 3) {
-            returnUnit = new CommanderUnit("commander", 90, field, location);
-        }
-        return returnUnit;
+    public static Unit createUnit(UnitType unitType, Battlefield battlefield, Location location) {
+        return switch (unitType) {
+            case INFANTRY -> new InfantryUnit("infantry", 60, battlefield, location);
+            case RANGED -> new RangedUnit("ranged", 45, battlefield, location);
+            case CAVALRY -> new CavalryUnit("cavalry", 75, battlefield, location);
+            case PALADIN -> new Paladin("Paladin", 100, battlefield, location);
+            case WARCHIEF -> new Warchief("Warchief", 100, battlefield, location);
+            case DEATH_KNIGHT -> new DeathKnight("Death Knight", 100, battlefield, location);
+        };
     }
 }

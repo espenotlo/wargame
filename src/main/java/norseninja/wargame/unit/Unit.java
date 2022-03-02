@@ -1,11 +1,11 @@
 package norseninja.wargame.unit;
 
 import norseninja.wargame.Army;
-import norseninja.wargame.Field;
+import norseninja.wargame.Battlefield;
 import norseninja.wargame.Location;
 import norseninja.wargame.Randomizer;
+import norseninja.wargame.tempeffect.TempEffect;
 
-import java.util.LinkedList;
 import java.util.List;
 
 public abstract class Unit {
@@ -17,21 +17,25 @@ public abstract class Unit {
     private int resistBonus;
     private int initiative;
     private int initiativeBonus;
+    private int movementSpeed;
     private Army army;
-    private Field field;
+    private Battlefield battlefield;
     private Location location;
+    private int attackRange;
 
-    protected Unit (String name, int health, int attack, int armor, Field field, Location location) {
+    protected Unit (String name, int health, int attack, int armor, Battlefield battlefield, Location location) {
         this.name = name;
         this.health = health;
         this.attack = attack;
-        this.attackBonus = 0;
         this.armor = armor;
+        this.battlefield = battlefield;
+        this.location = location;
+        this.attackBonus = 0;
         this.resistBonus = 0;
         this.initiative = 0;
         this.initiativeBonus = 0;
-        this.field = field;
-        this.location = location;
+        this.movementSpeed = 1;
+        this.attackRange = 1;
     }
 
 
@@ -51,11 +55,23 @@ public abstract class Unit {
         return armor;
     }
 
+    public int getMovementSpeed() {
+        return movementSpeed;
+    }
+
+    public void setMovementSpeed(int movementSpeed) {
+        this.movementSpeed = movementSpeed;
+    }
+
     public void setHealth(int health) {
         this.health = Math.max(health, 0);
         if (this.health == 0) {
             setDead();
         }
+    }
+
+    public void setAttackRange(int attackRange) {
+        this.attackRange = attackRange;
     }
 
     public void setAttack(int attack) {
@@ -90,16 +106,15 @@ public abstract class Unit {
         return this.initiativeBonus;
     }
 
-    public int attack(Unit opponent) {
+    public void attack(Unit opponent) {
         int postAttackHealth = Math.min(
                 opponent.getHealth()
-                        - Randomizer.getRandom().nextInt(attack)
+                        - (Randomizer.getRandom().nextInt(attack) + 1)
                         - this.getAttackBonus()
                         + opponent.getArmor()
                         + opponent.getResistBonus()
                 , opponent.getHealth());
         opponent.setHealth(postAttackHealth);
-        return postAttackHealth;
     }
 
     public Army getArmy() {
@@ -124,35 +139,55 @@ public abstract class Unit {
 
     public void setLocation(Location newLocation) {
         if (null != location) {
-            field.clear(location);
+            battlefield.clear(location);
         }
         this.location = newLocation;
-        field.place(this, newLocation);
+        battlefield.place(this, newLocation);
     }
 
     public void act() {
-        List<Location> l = field.getOccupiedAdjacentLocations(location, 29);
-        List<Location> opponentsLocations = new LinkedList<>();
-        for (Location location : l) {
-            Object obj = field.getObjectAt(location);
-            if (obj instanceof Unit) {
-                Unit unit = (Unit) obj;
-                if (unit.getArmy() != this.army) {
-                    opponentsLocations.add(location);
-                }
-            }
+        //Find nearest hostile unit
+        Location targetLocation = acquireTarget();
 
+        //If target was spotted
+        if (null != targetLocation) {
+            int distance = getLocation().distanceTo(targetLocation);
+
+            //If target is out of range:
+            if (distance > attackRange) {
+                closeIn(targetLocation);
+
+            //Target is too close for comfort:
+            } else if (distance < attackRange) {
+                keepAtRange(targetLocation);
+            }
+            //Attack if within range
+            if (getLocation().distanceTo(targetLocation) <= attackRange) {
+                attack((Unit) getField().getObjectAt(targetLocation));
+            }
         }
-        if (opponentsLocations.size() > 0) {
-            Location targetLocation = location.getNearestLocation(opponentsLocations);
-            Location newLocation = targetLocation.getNearestLocation(field.getFreeAdjacentLocations(location));
-            if (null != newLocation && newLocation.distanceTo(targetLocation) >= 1
-                    && newLocation.distanceTo(targetLocation) <= getLocation().distanceTo(targetLocation)) {
-                setLocation(newLocation);
-            }
-            if (getLocation().distanceTo(targetLocation) <= 1) {
-                attack((Unit) field.getObjectAt(targetLocation));
-            }
+    }
+
+    private Location acquireTarget() {
+        List<Location> hostiles = getField().getHostileLocationsWithinRange(this, Math.max(getField().getDepth(), getField().getWidth()));
+        if (!hostiles.isEmpty()) {
+            return getLocation().getNearestLocation(hostiles);
+        }
+        return null;
+    }
+
+    private void closeIn(Location targetLocation) {
+        Location newLocation = targetLocation.getLocationDownToRange(getField().getFreeAdjacentLocations(getLocation(), getMovementSpeed()), attackRange);
+        if (null != newLocation) {
+            setLocation(newLocation);
+        }
+    }
+
+    private void keepAtRange(Location targetLocation) {
+        Location newLocation = targetLocation.getLocationUpToRange(getField().getFreeAdjacentLocations(getLocation(), getMovementSpeed()), attackRange);
+        if (null != newLocation && newLocation.distanceTo(targetLocation) <= attackRange
+                && newLocation.distanceTo(targetLocation) >= getLocation().distanceTo(targetLocation)) {
+            setLocation(newLocation);
         }
     }
 
@@ -164,14 +199,22 @@ public abstract class Unit {
     {
         if (location != null)
         {
-            field.clear(location);
+            List<TempEffect> tempEffects = battlefield.getTempEffectsBySource(this);
+            if (!tempEffects.isEmpty()) {
+                tempEffects.forEach(effect -> {
+                    if (effect.isConcentration()) {
+                        battlefield.removeTempEffect(effect);
+                    }
+                });
+            }
+            battlefield.clear(location);
             location = null;
-            field = null;
+            battlefield = null;
         }
     }
 
-    public Field getField() {
-        return this.field;
+    public Battlefield getField() {
+        return this.battlefield;
     }
 
     public Location getLocation() {
