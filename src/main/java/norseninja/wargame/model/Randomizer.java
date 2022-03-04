@@ -1,4 +1,4 @@
-package norseninja.wargame;
+package norseninja.wargame.model;
 
 import java.util.Random;
 
@@ -9,13 +9,13 @@ public class Randomizer
     // A shared Random object, if required.
     private static final Random rand = new Random(SEED);
     // Determine whether a shared random generator is to be provided.
-    private static final boolean useShared = false;
+    private static final boolean USE_SHARED = false;
 
     /**
      * Constructor for objects of class Randomizer
      */
-    public Randomizer()
-    {
+    private Randomizer() {
+        //intentionally empty
     }
 
     /**
@@ -24,7 +24,7 @@ public class Randomizer
      */
     public static Random getRandom()
     {
-        if(useShared) {
+        if(USE_SHARED) {
             return rand;
         }
         else {
@@ -38,7 +38,7 @@ public class Randomizer
      */
     public static void reset()
     {
-        if(useShared) {
+        if(USE_SHARED) {
             rand.setSeed(SEED);
         }
     }

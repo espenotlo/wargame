@@ -1,7 +1,7 @@
-package norseninja.wargame.unit;
+package norseninja.wargame.model.unit;
 
-import norseninja.wargame.Battlefield;
-import norseninja.wargame.Location;
+import norseninja.wargame.model.Battlefield;
+import norseninja.wargame.model.Location;
 
 public class CavalryUnit extends Unit {
     private boolean firstStrike = true;
@@ -25,8 +25,8 @@ public class CavalryUnit extends Unit {
     }
 
     @Override
-    public void attack(Unit opponent) {
-        super.attack(opponent);
+    public int attack(Unit opponent) {
         this.firstStrike = false;
+        return super.attack(opponent);
     }
 }

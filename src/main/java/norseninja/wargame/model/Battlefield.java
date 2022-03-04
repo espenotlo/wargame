@@ -1,7 +1,7 @@
-package norseninja.wargame;
+package norseninja.wargame.model;
 
-import norseninja.wargame.tempeffect.TempEffect;
-import norseninja.wargame.unit.Unit;
+import norseninja.wargame.model.tempeffect.TempEffect;
+import norseninja.wargame.model.unit.Unit;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -253,20 +253,27 @@ public class Battlefield {
      * @return {@code String} format of the field.
      */
     public String getAsString() {
-        StringBuilder sb = new StringBuilder("Field:\n");
+        StringBuilder sb = new StringBuilder("Field:\n   ");
+        for (int cols = 0; cols < width; cols++) {
+            sb.append(cols).append(" ");
+            if (cols < 9) {
+                sb.append(" ");
+            }
+        }
+        sb.append("\n");
         for (int x = 0; x < depth; x++) {
+            if (x < 10) {
+                sb.append(" ").append(x);
+            } else {
+                sb.append(x);
+            }
             for (int y = 0; y < width; y++) {
+
                 if (field[x][y] == null) {
-                    sb.append("- ");
+                    sb.append(" - ");
                 } else {
                     Unit unit = (Unit) field[x][y];
-                    switch (unit.getArmy().getName()) {
-                        case "one" -> sb.append("A ");
-                        case "two" -> sb.append("B ");
-                        case "three" -> sb.append("C ");
-                        case "four" -> sb.append("D ");
-                        default -> sb.append(" ");
-                    }
+                    sb.append(" ").append(unit.getArmy().getName().split("")[0]).append(" ");
                 }
             }
             sb.append("\n");

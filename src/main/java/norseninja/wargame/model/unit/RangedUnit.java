@@ -1,7 +1,7 @@
-package norseninja.wargame.unit;
+package norseninja.wargame.model.unit;
 
-import norseninja.wargame.Battlefield;
-import norseninja.wargame.Location;
+import norseninja.wargame.model.Battlefield;
+import norseninja.wargame.model.Location;
 
 public class RangedUnit extends Unit {
 

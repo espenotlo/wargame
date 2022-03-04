@@ -1,12 +1,13 @@
-package norseninja.wargame.unit;
+package norseninja.wargame.model.unit;
 
-import norseninja.wargame.Army;
-import norseninja.wargame.Battlefield;
-import norseninja.wargame.Location;
-import norseninja.wargame.Randomizer;
-import norseninja.wargame.tempeffect.TempEffect;
+import norseninja.wargame.model.Army;
+import norseninja.wargame.model.Battlefield;
+import norseninja.wargame.model.Location;
+import norseninja.wargame.model.Randomizer;
+import norseninja.wargame.model.tempeffect.TempEffect;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public abstract class Unit {
     private final String name;
@@ -106,15 +107,24 @@ public abstract class Unit {
         return this.initiativeBonus;
     }
 
-    public void attack(Unit opponent) {
-        int postAttackHealth = Math.min(
-                opponent.getHealth()
-                        - (Randomizer.getRandom().nextInt(attack) + 1)
-                        - this.getAttackBonus()
-                        + opponent.getArmor()
-                        + opponent.getResistBonus()
-                , opponent.getHealth());
-        opponent.setHealth(postAttackHealth);
+    public int getAttackRange() {
+        return this.attackRange;
+    }
+
+    public int attack(Unit opponent) {
+        if (null != opponent && getField().getHostileUnitsWithinRange(this, attackRange).contains(opponent)) {
+            int preAttackHealth = opponent.getHealth();
+            int postAttackHealth = Math.min(
+                    opponent.getHealth()
+                            - (Randomizer.getRandom().nextInt(attack) + 1)
+                            - this.getAttackBonus()
+                            + opponent.getArmor()
+                            + opponent.getResistBonus()
+                    , opponent.getHealth());
+            opponent.setHealth(postAttackHealth);
+            return preAttackHealth - postAttackHealth;
+        }
+        return -1;
     }
 
     public Army getArmy() {
@@ -147,44 +157,61 @@ public abstract class Unit {
 
     public void act() {
         //Find nearest hostile unit
-        Location targetLocation = acquireTarget();
+        Unit target = acquireTarget();
 
         //If target was spotted
-        if (null != targetLocation) {
+        if (null != target) {
+            Location targetLocation = target.getLocation();
             int distance = getLocation().distanceTo(targetLocation);
 
             //If target is out of range:
             if (distance > attackRange) {
+                System.out.print(getName() + " at " + getLocation().toString());
                 closeIn(targetLocation);
-
+                System.out.println(" moved to " + getLocation().toString() + ".");
             //Target is too close for comfort:
             } else if (distance < attackRange) {
+                System.out.print(getName() + " at " + getLocation().toString());
                 keepAtRange(targetLocation);
+                System.out.println(" moved to " + getLocation().toString() + ".");
             }
             //Attack if within range
             if (getLocation().distanceTo(targetLocation) <= attackRange) {
                 attack((Unit) getField().getObjectAt(targetLocation));
+                System.out.println(getName() + " at "
+                        + getLocation().toString() + " attacked "
+                        + target.getName() + " at "
+                        + targetLocation.toString() + ".");
             }
         }
     }
 
-    private Location acquireTarget() {
-        List<Location> hostiles = getField().getHostileLocationsWithinRange(this, Math.max(getField().getDepth(), getField().getWidth()));
+    private Unit acquireTarget() {
+        List<Location> hostiles = getField().getHostileLocationsWithinRange(this, getField().getWidth());
+
         if (!hostiles.isEmpty()) {
-            return getLocation().getNearestLocation(hostiles);
+            return (Unit) getField().getObjectAt(getLocation().getNearestLocation(hostiles));
         }
         return null;
     }
 
     private void closeIn(Location targetLocation) {
-        Location newLocation = targetLocation.getLocationDownToRange(getField().getFreeAdjacentLocations(getLocation(), getMovementSpeed()), attackRange);
+        Location newLocation = targetLocation.getLocationDownToRange(getValidMoves(), attackRange);
         if (null != newLocation) {
             setLocation(newLocation);
         }
     }
 
+    public boolean moveTo(Location location) {
+        if (null != location && getValidMoves().contains(location)) {
+            setLocation(location);
+            return true;
+        }
+        return false;
+    }
+
     private void keepAtRange(Location targetLocation) {
-        Location newLocation = targetLocation.getLocationUpToRange(getField().getFreeAdjacentLocations(getLocation(), getMovementSpeed()), attackRange);
+        Location newLocation = targetLocation.getLocationUpToRange(getValidMoves(), attackRange);
         if (null != newLocation && newLocation.distanceTo(targetLocation) <= attackRange
                 && newLocation.distanceTo(targetLocation) >= getLocation().distanceTo(targetLocation)) {
             setLocation(newLocation);
@@ -219,5 +246,24 @@ public abstract class Unit {
 
     public Location getLocation() {
         return this.location;
+    }
+
+    public List<Unit> getValidTargets() {
+        return getField().getHostileUnitsWithinRange(this, attackRange);
+    }
+
+    public List<Location> getValidMoves() {
+        return getField().getFreeAdjacentLocations(getLocation(),getMovementSpeed());
+    }
+
+    @Override
+    public String toString() {
+        return "Name: " + getName() +
+                ";Health: " + getHealth() +
+                ";Attack: " + (getAttack() + getAttackBonus()) +
+                ";Armor: " + (getArmor() + getResistBonus()) +
+                ";Attack range: " + getAttackRange() +
+                ";Speed: " + getMovementSpeed() +
+                ";Location: " + getLocation();
     }
 }

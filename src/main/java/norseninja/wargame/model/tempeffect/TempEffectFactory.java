@@ -1,6 +1,6 @@
-package norseninja.wargame.tempeffect;
+package norseninja.wargame.model.tempeffect;
 
-import norseninja.wargame.unit.Unit;
+import norseninja.wargame.model.unit.Unit;
 
 import java.util.*;
 
@@ -28,10 +28,10 @@ public class TempEffectFactory {
                 return new Buff("Frenzy", 5, source, target, effects);
             }
             case BLOODLUST -> {
-                effects.put(TempEffect.EffectType.ATTACKBONUS, 6);
+                effects.put(TempEffect.EffectType.ATTACKBONUS, 9);
                 List<Unit> targets = source.getField()
                         .getFriendlyUnitsWithinRange(source, 5);
-                return new Buff("Bloodlust", 5, source, targets, effects);
+                return new Buff("Bloodlust", 3, source, targets, effects);
             }
             default -> throw new IllegalStateException("Unexpected value: " + type);
         }

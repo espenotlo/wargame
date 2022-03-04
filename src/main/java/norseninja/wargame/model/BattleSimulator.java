@@ -1,7 +1,7 @@
-package norseninja.wargame;
+package norseninja.wargame.model;
 
-import norseninja.wargame.tempeffect.TempEffect;
-import norseninja.wargame.unit.Unit;
+import norseninja.wargame.model.tempeffect.TempEffect;
+import norseninja.wargame.model.unit.Unit;
 
 import java.time.LocalTime;
 import java.util.*;

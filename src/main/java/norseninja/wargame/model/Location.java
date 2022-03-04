@@ -1,4 +1,4 @@
-package norseninja.wargame;
+package norseninja.wargame.model;
 
 import java.util.List;
 
@@ -32,6 +32,20 @@ public class Location
         else {
             return false;
         }
+    }
+
+    public static Location parseLocation(String string) {
+        if (null != string && string.contains(",") && string.length() > 2) {
+            String[] coords = string.strip().split(",");
+            try {
+                int r = Integer.parseInt(coords[0]);
+                int c = Integer.parseInt(coords[1]);
+                return new Location(r, c);
+            } catch (NumberFormatException e) {
+                return null;
+            }
+        }
+        return null;
     }
 
     /**

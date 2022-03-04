@@ -1,7 +1,7 @@
-package norseninja.wargame;
+package norseninja.wargame.model;
 
-import norseninja.wargame.unit.Unit;
-import norseninja.wargame.unit.UnitFactory;
+import norseninja.wargame.model.unit.Unit;
+import norseninja.wargame.model.unit.UnitFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;

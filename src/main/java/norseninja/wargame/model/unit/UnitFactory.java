@@ -1,7 +1,10 @@
-package norseninja.wargame.unit;
+package norseninja.wargame.model.unit;
 
-import norseninja.wargame.Battlefield;
-import norseninja.wargame.Location;
+import norseninja.wargame.model.Battlefield;
+import norseninja.wargame.model.Location;
+import norseninja.wargame.model.unit.commander.DeathKnight;
+import norseninja.wargame.model.unit.commander.Paladin;
+import norseninja.wargame.model.unit.commander.Warchief;
 
 public class UnitFactory {
 

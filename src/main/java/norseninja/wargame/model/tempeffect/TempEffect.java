@@ -1,6 +1,6 @@
-package norseninja.wargame.tempeffect;
+package norseninja.wargame.model.tempeffect;
 
-import norseninja.wargame.unit.Unit;
+import norseninja.wargame.model.unit.Unit;
 
 import java.util.List;
 import java.util.Map;
